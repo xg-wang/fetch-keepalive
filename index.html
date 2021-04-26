@@ -1,0 +1,101 @@
+<p id="support"></p>
+
+<label for="number">Number of fetch/beacon in parallel</label>
+<input type="text" id="number" name="number" required value="10" />
+
+<br />
+
+<button onclick="fetchKeepAlive()">1 fetch keepalive 70kb</button>
+<button onclick="fetchKeepAliveMultiple()">multiple fetch keepalive</button>
+
+<br />
+
+<button onclick="sendBeacon()">1 sendBeacon 70kb</button>
+<button onclick="sendBeaconMultiple()">multiple sendBeacon</button>
+
+<br />
+
+<button onclick="fetchRegular()">1 fetch keepalive=false 70kb</button>
+<button onclick="fetchRegularMultiple()">multiple fetch keepalive=false</button>
+
+<script id="code">
+  const browserSupportsKeepalive = "keepalive" in new Request("");
+  support.textContent = `This browser support keepalive fetch: ${browserSupportsKeepalive}`;
+  function fetchKeepAlive() {
+    fetch("/api", {
+      credentials: "same-origin",
+      headers: [["content-type", "text/plain"]],
+      method: "POST",
+      mode: "cors",
+      keepalive: true,
+      body: "s".repeat(70_000),
+    })
+      .then((res) => res.text())
+      .then((res) => console.log(res))
+      .catch((reason) => console.error(reason));
+  }
+  function fetchKeepAliveMultiple() {
+    let count = parseInt(number.value);
+    for (let i = 0; i < count; i++) {
+      fetch("/api", {
+        credentials: "same-origin",
+        headers: [["content-type", "text/plain"]],
+        method: "POST",
+        mode: "cors",
+        keepalive: true,
+        body: "s".repeat(100),
+      })
+        .then((res) => res.text())
+        .then((res) => console.log(res))
+        .catch((reason) => console.error(reason));
+    }
+  }
+  function sendBeacon() {
+    console.log(
+      `sendBeacon result: ${navigator.sendBeacon("/api", "s".repeat(70_000))}`
+    );
+  }
+  function sendBeaconMultiple() {
+    let count = parseInt(number.value);
+    for (let i = 0; i < count; i++) {
+      console.log(
+        `sendBeacon result: ${navigator.sendBeacon("/api", "s".repeat(100))}`
+      );
+    }
+  }
+  function fetchRegular() {
+    fetch("/api", {
+      credentials: "same-origin",
+      headers: [["content-type", "text/plain"]],
+      method: "POST",
+      mode: "cors",
+      keepalive: false,
+      body: "s".repeat(70_000),
+    })
+      .then((res) => res.text())
+      .then((res) => console.log(res))
+      .catch((reason) => console.error(reason));
+  }
+  function fetchRegularMultiple() {
+    let count = parseInt(number.value);
+    for (let i = 0; i < count; i++) {
+      fetch("/api", {
+        credentials: "same-origin",
+        headers: [["content-type", "text/plain"]],
+        method: "POST",
+        mode: "cors",
+        keepalive: false,
+        body: "s".repeat(100),
+      })
+        .then((res) => res.text())
+        .then((res) => console.log(res))
+        .catch((reason) => console.error(reason));
+    }
+  }
+</script>
+
+<pre id="pre"></pre>
+
+<script>
+  pre.textContent = code.textContent;
+</script>
